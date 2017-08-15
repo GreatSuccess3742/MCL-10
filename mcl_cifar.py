@@ -24,8 +24,7 @@ from tflearn.data_augmentation import ImageAugmentation
 
 # Data loading and preprocessing
 from tflearn.datasets import cifar10
-(X, Y), (X_test, Y_test) = cifar10.load_data('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn')
-
+(X, Y), (X_test, Y_test) = cifar10.load_data('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10')#('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn')
 
 # Load in MCL10 as training set
 # Width and height of each image.
@@ -33,10 +32,15 @@ img_size = 32
 num_classes = 10
 
 # number of images in MCL10, which is total image divided by 10
-num_per_class = 600
+num_per_class = 30
 
-imgDatamcl_32 = np.fromfile('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\MCL10_dat\\imgData_6000.dat', dtype=np.uint8)
-labelDatamcl_32 = np.loadtxt('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\MCL10_dat\\labelData_6000.txt', dtype=np.int64)
+# Windows Path:
+# imgDatamcl_32 = np.fromfile('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\MCL10_dat\\imgData_6000.dat', dtype=np.uint8)
+# labelDatamcl_32 = np.loadtxt('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\MCL10_dat\\labelData_6000.txt', dtype=np.int64)
+
+# OSX Path:
+imgDatamcl_32 = np.fromfile('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/MCL10_dat/imgData_300.dat', dtype=np.uint8)
+labelDatamcl_32 = np.loadtxt('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/MCL10_dat/labelData_300.txt', dtype=np.int64)
 
 imgDatamcl_32 = imgDatamcl_32.reshape([int((imgDatamcl_32.shape)[0]/(img_size*img_size*3)), img_size, img_size, 3])
 imgDatamcl_32 = imgDatamcl_32.astype(np.float64)/255.0
@@ -92,13 +96,15 @@ img_aug.add_random_flip_leftright()
 img_aug.add_random_rotation(max_angle=25.)
 
 # Convolutional network building
-'''
+
 network = input_data(shape=[None, 32, 32, 3],
                      data_preprocessing=img_prep,
                      data_augmentation=img_aug)
+
 '''
 network = input_data(shape=[None, 32, 32, 3],
                      data_preprocessing=img_prep)
+'''
 network = conv_2d(network, 32, 3, activation='relu')
 network = max_pool_2d(network, 2)
 network = conv_2d(network, 64, 3, activation='relu')
@@ -113,8 +119,8 @@ network = regression(network, optimizer='adam',
 
 # Train using classifier
 model = tflearn.DNN(network, tensorboard_verbose=0)
-model.fit(X, Y, n_epoch=100, shuffle=True, #validation_set=0.1,
-          show_metric=True, batch_size=96, run_id='cifar10_cnn')
+model.fit(X, Y, n_epoch=10, shuffle=True, #validation_set=0.1,
+          show_metric=True, batch_size=10, run_id='cifar10_cnn')
 
 # Evaluate model
 score = model.evaluate(X_test, Y_test)
