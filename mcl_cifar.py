@@ -43,42 +43,51 @@ imgDatamcl_32 = np.fromfile('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tfle
 labelDatamcl_32 = np.loadtxt('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/MCL10_dat/labelData_300.txt', dtype=np.int64)
 
 imgDatamcl_32 = imgDatamcl_32.reshape([int((imgDatamcl_32.shape)[0]/(img_size*img_size*3)), img_size, img_size, 3])
-imgDatamcl_32 = imgDatamcl_32.astype(np.float64)/255.0
+imgDatamcl_32 = imgDatamcl_32.astype(np.float64)/255
 
 classIndices = np.arange(num_classes)*num_per_class
 classIndices = classIndices.astype(np.int64)
-training_ratio = 1
+training_ratio = 0.6666
 
 images_train = np.zeros([int(round(imgDatamcl_32.shape[0]*training_ratio)), imgDatamcl_32.shape[1], imgDatamcl_32.shape[2], imgDatamcl_32.shape[3]])
 cls_train = np.zeros([int(round(imgDatamcl_32.shape[0]*training_ratio))])
-cls_train = cls_train.astype(np.int32)
+images_test = np.zeros([int(round(imgDatamcl_32.shape[0]*(1-training_ratio))), imgDatamcl_32.shape[1], imgDatamcl_32.shape[2], imgDatamcl_32.shape[3]])
+cls_test = np.zeros([int(round(imgDatamcl_32.shape[0]*(1-training_ratio)))])
 
 num_train = int(round(num_per_class*training_ratio))
-
+num_test = int(round(num_per_class*(1-training_ratio)))
 classIndices = np.arange(num_classes)*num_per_class
 trainIndices = np.arange(num_classes)*num_train
+testIndices = np.arange(num_classes)*num_test
 
 for i in range(num_classes):
     images_train[trainIndices[i]:trainIndices[i]+num_train,:,:,:] = imgDatamcl_32[classIndices[i]:classIndices[i]+num_train,:,:,:]
     cls_train[trainIndices[i]:trainIndices[i]+num_train] = labelDatamcl_32[classIndices[i]:classIndices[i]+num_train]
+
+    images_test[testIndices[i]:testIndices[i]+num_test,:,:,:] = imgDatamcl_32[classIndices[i]+num_train:classIndices[i]+num_train+num_test,:,:,:]
+    cls_test[testIndices[i]:testIndices[i]+num_test] = labelDatamcl_32[classIndices[i]+num_train:classIndices[i]+num_train+num_test]
+
 
 X = images_train
 Y = cls_train
 
 X, Y = shuffle(X, Y)
 
+X_test = X_test[0:100][:][:][:]
+Y_test = Y_test[0:100]
+
 '''
 count = 0
 for i in range(0,600):
-	# Index of image, used to check whatever image you want
-	image_index = i
-	if(True):
-		count = count + 1
-		print(count)
-		print(X[image_index])
-		plt.title(Y[image_index])
-		plt.imshow(X[image_index])
-		plt.show()
+    # Index of image, used to check whatever image you want
+    image_index = i*20
+    if(True):
+        count = count + 1
+        print(count)
+        print(X_test[image_index])
+        plt.title(Y_test[image_index])
+        plt.imshow(X_test[image_index])
+        plt.show()
 exit()
 '''
 
@@ -119,7 +128,7 @@ network = regression(network, optimizer='adam',
 
 # Train using classifier
 model = tflearn.DNN(network, tensorboard_verbose=0)
-model.fit(X, Y, n_epoch=10, shuffle=True, #validation_set=0.1,
+model.fit(X, Y, n_epoch=500, shuffle=True, #validation_set=0.1,
           show_metric=True, batch_size=10, run_id='cifar10_cnn')
 
 # Evaluate model
