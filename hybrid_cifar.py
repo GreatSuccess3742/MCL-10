@@ -32,22 +32,22 @@ img_size = 32
 num_classes = 10
 
 # number of images in MCL10, which is total image divided by 10
-num_per_class = 30
+num_per_class = 600
 
 # Windows Path:
 # imgDatamcl_32 = np.fromfile('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\MCL10_dat\\imgData_6000.dat', dtype=np.uint8)
 # labelDatamcl_32 = np.loadtxt('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\MCL10_dat\\labelData_6000.txt', dtype=np.int64)
 
 # OSX Path:
-imgDatamcl_32 = np.fromfile('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/MCL10_dat/imgData_300.dat', dtype=np.uint8)
-labelDatamcl_32 = np.loadtxt('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/MCL10_dat/labelData_300.txt', dtype=np.int64)
+imgDatamcl_32 = np.fromfile('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/MCL10_dat/imgData_6000.dat', dtype=np.uint8)
+labelDatamcl_32 = np.loadtxt('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/MCL10_dat/labelData_6000.txt', dtype=np.int64)
 
 imgDatamcl_32 = imgDatamcl_32.reshape([int((imgDatamcl_32.shape)[0]/(img_size*img_size*3)), img_size, img_size, 3])
 imgDatamcl_32 = imgDatamcl_32.astype(np.float64)/255
 
 classIndices = np.arange(num_classes)*num_per_class
 classIndices = classIndices.astype(np.int64)
-training_ratio = 0.6666
+training_ratio = 0.5
 
 images_train = np.zeros([int(round(imgDatamcl_32.shape[0]*training_ratio)), imgDatamcl_32.shape[1], imgDatamcl_32.shape[2], imgDatamcl_32.shape[3]])
 cls_train = np.zeros([int(round(imgDatamcl_32.shape[0]*training_ratio))])
@@ -67,29 +67,47 @@ for i in range(num_classes):
     images_test[testIndices[i]:testIndices[i]+num_test,:,:,:] = imgDatamcl_32[classIndices[i]+num_train:classIndices[i]+num_train+num_test,:,:,:]
     cls_test[testIndices[i]:testIndices[i]+num_test] = labelDatamcl_32[classIndices[i]+num_train:classIndices[i]+num_train+num_test]
 
+# Define hybrid training data
 
-X = images_train
-Y = cls_train
+# Number of images hybrid training set contains
+num_of_img = 6000
 
-X, Y = shuffle(X, Y)
+X_hybrid = np.zeros([num_of_img,32,32,3])
+Y_hybrid = np.zeros([num_of_img])
 
-X_test = X_test[0:100][:][:][:]
-Y_test = Y_test[0:100]
+X_hybrid = X_hybrid.astype(np.float64)
+Y_hybrid = Y_hybrid.astype(np.int64)
+
+# Insert cifar-10 into the array
+X_hybrid[0:int(num_of_img/2)][:][:][:] = X[0:int(num_of_img/2)][:][:][:]
+Y_hybrid[0:int(num_of_img/2)] = Y[0:int(num_of_img/2)]
+
+# Insert mcl-10 into the array
+X_hybrid[int(num_of_img/2):num_of_img] = images_train
+Y_hybrid[int(num_of_img/2):num_of_img] = cls_train
 
 '''
 count = 0
-for i in range(0,600):
+for i in range(1186,1200):
     # Index of image, used to check whatever image you want
-    image_index = i*20
+    image_index = i
     if(True):
         count = count + 1
         print(count)
-        print(X_test[image_index])
-        plt.title(Y_test[image_index])
-        plt.imshow(X_test[image_index])
+        print(X_hybrid[image_index])
+        plt.title(Y_hybrid[image_index])
+        plt.imshow(X_hybrid[image_index])
         plt.show()
 exit()
 '''
+
+X = X_hybrid
+Y = Y_hybrid
+
+X, Y = shuffle(X, Y)
+
+X_test = X_test[0:int(num_of_img/3)][:][:][:]
+Y_test = Y_test[0:int(num_of_img/3)]
 
 Y = to_categorical(Y, 10)
 Y_test = to_categorical(Y_test, 10)
@@ -128,7 +146,7 @@ network = regression(network, optimizer='adam',
 
 # Train using classifier
 model = tflearn.DNN(network, tensorboard_verbose=0)
-model.fit(X, Y, n_epoch=500, shuffle=True, #validation_set=0.1,
+model.fit(X, Y, n_epoch=100, shuffle=True, validation_set=0.1,
           show_metric=True, batch_size=10, run_id='cifar10_cnn')
 
 # Evaluate model
