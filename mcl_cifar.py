@@ -24,7 +24,8 @@ from tflearn.data_augmentation import ImageAugmentation
 
 # Data loading and preprocessing
 from tflearn.datasets import cifar10
-(X, Y), (X_test, Y_test) = cifar10.load_data('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10')#('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn')
+# (X, Y), (X_test, Y_test) = cifar10.load_data('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10')
+(X, Y), (X_test, Y_test) = cifar10.load_data('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn')
 
 # Load in MCL10 as training set
 # Width and height of each image.
@@ -34,20 +35,22 @@ num_classes = 10
 # number of images in MCL10, which is total image divided by 10
 num_per_class = 30
 
+# Loading WhiteBG images
+
 # Windows Path:
-# imgDatamcl_32 = np.fromfile('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\MCL10_dat\\imgData_6000.dat', dtype=np.uint8)
-# labelDatamcl_32 = np.loadtxt('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\MCL10_dat\\labelData_6000.txt', dtype=np.int64)
+imgDatamcl_32 = np.fromfile('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\MCL10_dat\\imgData_300.dat', dtype=np.uint8)
+labelDatamcl_32 = np.loadtxt('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\MCL10_dat\\labelData_300.txt', dtype=np.int64)
 
 # OSX Path:
-imgDatamcl_32 = np.fromfile('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/MCL10_dat/imgData_300.dat', dtype=np.uint8)
-labelDatamcl_32 = np.loadtxt('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/MCL10_dat/labelData_300.txt', dtype=np.int64)
+# imgDatamcl_32 = np.fromfile('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/MCL10_dat/imgData_300.dat', dtype=np.uint8)
+# labelDatamcl_32 = np.loadtxt('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/MCL10_dat/labelData_300.txt', dtype=np.int64)
 
 imgDatamcl_32 = imgDatamcl_32.reshape([int((imgDatamcl_32.shape)[0]/(img_size*img_size*3)), img_size, img_size, 3])
 imgDatamcl_32 = imgDatamcl_32.astype(np.float64)/255
 
 classIndices = np.arange(num_classes)*num_per_class
 classIndices = classIndices.astype(np.int64)
-training_ratio = 0.6666
+training_ratio = 1
 
 images_train = np.zeros([int(round(imgDatamcl_32.shape[0]*training_ratio)), imgDatamcl_32.shape[1], imgDatamcl_32.shape[2], imgDatamcl_32.shape[3]])
 cls_train = np.zeros([int(round(imgDatamcl_32.shape[0]*training_ratio))])
@@ -67,29 +70,66 @@ for i in range(num_classes):
     images_test[testIndices[i]:testIndices[i]+num_test,:,:,:] = imgDatamcl_32[classIndices[i]+num_train:classIndices[i]+num_train+num_test,:,:,:]
     cls_test[testIndices[i]:testIndices[i]+num_test] = labelDatamcl_32[classIndices[i]+num_train:classIndices[i]+num_train+num_test]
 
-
 X = images_train
 Y = cls_train
 
+'''
+# Loading GreyBG images
+# Windows Path:
+imgDatamcl_32 = np.fromfile('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\MCL10_dat\\MCL10_GreyBG\\GreyBG_300.dat', dtype=np.uint8)
+labelDatamcl_32 = np.loadtxt('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\MCL10_dat\\MCL10_GreyBG\\GreyBG_label_300.txt', dtype=np.int64)
+
+# OSX Path:
+# imgDatamcl_32 = np.fromfile('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/MCL10_dat/imgData_300.dat', dtype=np.uint8)
+# labelDatamcl_32 = np.loadtxt('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/MCL10_dat/labelData_300.txt', dtype=np.int64)
+
+imgDatamcl_32 = imgDatamcl_32.reshape([int((imgDatamcl_32.shape)[0]/(img_size*img_size*3)), img_size, img_size, 3])
+imgDatamcl_32 = imgDatamcl_32.astype(np.float64)/255
+
+classIndices = np.arange(num_classes)*num_per_class
+classIndices = classIndices.astype(np.int64)
+training_ratio = 1
+
+images_train = np.zeros([int(round(imgDatamcl_32.shape[0]*training_ratio)), imgDatamcl_32.shape[1], imgDatamcl_32.shape[2], imgDatamcl_32.shape[3]])
+cls_train = np.zeros([int(round(imgDatamcl_32.shape[0]*training_ratio))])
+images_test = np.zeros([int(round(imgDatamcl_32.shape[0]*(1-training_ratio))), imgDatamcl_32.shape[1], imgDatamcl_32.shape[2], imgDatamcl_32.shape[3]])
+cls_test = np.zeros([int(round(imgDatamcl_32.shape[0]*(1-training_ratio)))])
+
+num_train = int(round(num_per_class*training_ratio))
+num_test = int(round(num_per_class*(1-training_ratio)))
+classIndices = np.arange(num_classes)*num_per_class
+trainIndices = np.arange(num_classes)*num_train
+testIndices = np.arange(num_classes)*num_test
+
+for i in range(num_classes):
+    images_train[trainIndices[i]:trainIndices[i]+num_train,:,:,:] = imgDatamcl_32[classIndices[i]:classIndices[i]+num_train,:,:,:]
+    cls_train[trainIndices[i]:trainIndices[i]+num_train] = labelDatamcl_32[classIndices[i]:classIndices[i]+num_train]
+
+    images_test[testIndices[i]:testIndices[i]+num_test,:,:,:] = imgDatamcl_32[classIndices[i]+num_train:classIndices[i]+num_train+num_test,:,:,:]
+    cls_test[testIndices[i]:testIndices[i]+num_test] = labelDatamcl_32[classIndices[i]+num_train:classIndices[i]+num_train+num_test]
+
+X = np.concatenate((X,images_train), axis = 0)
+Y = np.concatenate((Y,cls_train), axis = 0)
+'''
+
 X, Y = shuffle(X, Y)
+
+'''
+count = 0
+for i in range(58,70):
+    # Index of image, used to check whatever image you want
+    image_index = i
+    if(True):
+        # print(X_test[image_index])
+        plt.title(Y[image_index])
+        plt.imshow(X[image_index])
+        plt.show()
+exit()
+'''
 
 X_test = X_test[0:100][:][:][:]
 Y_test = Y_test[0:100]
 
-'''
-count = 0
-for i in range(0,600):
-    # Index of image, used to check whatever image you want
-    image_index = i*20
-    if(True):
-        count = count + 1
-        print(count)
-        print(X_test[image_index])
-        plt.title(Y_test[image_index])
-        plt.imshow(X_test[image_index])
-        plt.show()
-exit()
-'''
 
 Y = to_categorical(Y, 10)
 Y_test = to_categorical(Y_test, 10)
@@ -105,15 +145,15 @@ img_aug.add_random_flip_leftright()
 img_aug.add_random_rotation(max_angle=25.)
 
 # Convolutional network building
-
+'''
 network = input_data(shape=[None, 32, 32, 3],
                      data_preprocessing=img_prep,
                      data_augmentation=img_aug)
-
 '''
+
 network = input_data(shape=[None, 32, 32, 3],
                      data_preprocessing=img_prep)
-'''
+
 network = conv_2d(network, 32, 3, activation='relu')
 network = max_pool_2d(network, 2)
 network = conv_2d(network, 64, 3, activation='relu')
@@ -128,7 +168,7 @@ network = regression(network, optimizer='adam',
 
 # Train using classifier
 model = tflearn.DNN(network, tensorboard_verbose=0)
-model.fit(X, Y, n_epoch=500, shuffle=True, #validation_set=0.1,
+model.fit(X, Y, n_epoch=200, shuffle=True, validation_set=0.1,
           show_metric=True, batch_size=10, run_id='cifar10_cnn')
 
 # Evaluate model

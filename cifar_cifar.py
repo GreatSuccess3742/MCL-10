@@ -29,8 +29,11 @@ from tflearn.datasets import cifar10
 X, Y = shuffle(X, Y)
 
 # Get a subset from the cifar10 training set
-X_subset = X[0:6000][:][:][:]
-Y_subset = Y[0:6000]
+X_subset = X[0:300][:][:][:]
+Y_subset = Y[0:300]
+
+X_test = X_test[0:100][:][:][:]
+Y_test = Y_test[0:100]
 
 '''
 for i in range(0,10):
@@ -76,7 +79,7 @@ network = regression(network, optimizer='adam',
 
 # Train using classifier
 model = tflearn.DNN(network, tensorboard_verbose=0)
-model.fit(X_subset, Y_subset, n_epoch=10, shuffle=True, validation_set=0.1,
+model.fit(X_subset, Y_subset, n_epoch=200, shuffle=True, validation_set=0.1,
           show_metric=True, batch_size=10, run_id='cifar10_cnn')
 
 # Evaluate model
