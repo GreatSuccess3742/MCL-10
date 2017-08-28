@@ -10,12 +10,12 @@ from PIL import Image
 import sys
 #======================================= Global vars ============================================#
 # Set to your corresponding path
-# path = '/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/mcl_10_eric_branch'
-path = 'F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\data_generation\\'
+path = '/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/data_generation/'
+# path = 'F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\data_generation\\'
 
-sizes = [32]#[32, 64, 128, 256]
+sizes = [256]#[32, 64, 128, 256]
 
-classes = os.listdir(path+'MCL-10_'+str(sizes[0])+'X'+str(sizes[0])+'_GB_flip')
+classes = os.listdir(path+'MCL-10_'+str(sizes[0])+'X'+str(sizes[0])+'_Black')
 
 # Maps class label in classes to actual label number in cifar-10
 # classNumLabel = [8, 5, 4, 6, 2, 9, 1, 0, 7, 3]
@@ -43,8 +43,8 @@ def getDatasetList():
 	listOfclassImage = []
 	for s in sizes:
 		for c in classes:
-			# classPath = path+'/MCL-10_'+str(s)+'X'+str(s)+'/'+c
-			classPath = path+'MCL-10_'+str(s)+'X'+str(s)+'_GB_flip'+'\\'+c
+			classPath = path+'/MCL-10_'+str(s)+'X'+str(s)+'_Black/'+c
+			# classPath = path+'MCL-10_'+str(s)+'X'+str(s)+'_GB_flip'+'\\'+c
 			listFiles = os.listdir(classPath)
 			for f in listFiles:
 				listOfImagePaths.append(classPath+'/'+f)
@@ -93,7 +93,7 @@ def dataAugment(image, label):
 	whiteBG = np.ones((32, 32, 3), dtype=np.uint8)*255
 
 	# fill the background with value 127 a.k.a grey
-	whiteBG.fill(127)
+	whiteBG.fill(0)
 	
 	# i, j = randomDoubles()
 	possibleRowOffset = [0, (32-obj_R)/2, (32-obj_R)]
@@ -151,9 +151,9 @@ def dataAugment(image, label):
 #================================================================================================#
 def saveData():
 	os.chdir(path)
-	imgData_32.tofile('GreyBG_600.dat', format='%u')
+	imgData_32.tofile('blackBG_300.dat', format='%u')
 	labelData32 = np.asarray(labelData_32)
-	np.savetxt('GreyBG_label_600.txt', labelData32, fmt='%s')
+	np.savetxt('blackBG_label_300.txt', labelData32, fmt='%s')
 
 #================================================================================================#
 def ShowImg():
@@ -163,15 +163,15 @@ def ShowImg():
 	num_classes = 10
 
 	# number of images in MCL10, which is total image divided by 10
-	num_per_class = 60
+	num_per_class = 30
 
 	# OSX Path:
-	# imgDatamcl_32 = np.fromfile('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/MCL10_dat/imgData_300.dat', dtype=np.uint8)
-	# labelDatamcl_32 = np.loadtxt('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/MCL10_dat/labelData_300.txt', dtype=np.int64)
+	imgDatamcl_32 = np.fromfile('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/data_generation/blackBG_300.dat', dtype=np.uint8)
+	labelDatamcl_32 = np.loadtxt('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tflearn/MCL-10/data_generation/blackBG_label_300.txt', dtype=np.int64)
 
 	# Windows Path:
-	imgDatamcl_32 = np.fromfile('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\data_generation\\GreyBG_600.dat', dtype=np.uint8)
-	labelDatamcl_32 = np.loadtxt('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\data_generation\\GreyBG_label_600.txt', dtype=np.int64)
+	# imgDatamcl_32 = np.fromfile('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\data_generation\\black_300.dat', dtype=np.uint8)
+	# labelDatamcl_32 = np.loadtxt('F:\\USC\\Research\\2017Summer\\mcl_10\\tf_learn\\data_generation\\black_label_300.txt', dtype=np.int64)
 
 	imgDatamcl_32 = imgDatamcl_32.reshape([int((imgDatamcl_32.shape)[0]/(img_size*img_size*3)), img_size, img_size, 3])
 	imgDatamcl_32 = imgDatamcl_32.astype(np.float64)/255
