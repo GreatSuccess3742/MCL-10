@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
 
 # Functions:
 def batching(image, image_size, window_size):
@@ -72,7 +73,13 @@ label_data_mcl = np.loadtxt('/Users/erichsieh/Desktop/USC/2017_Summer/MCL10/tfle
 image_data_mcl = image_data_mcl.reshape([int((image_data_mcl.shape)[0]/(img_size*img_size*3)), img_size, img_size, 3])
 image_data_mcl = image_data_mcl.astype(np.float64)/255
 
-batches = batching(image_data_mcl, img_size, 15)
+batches = batching(image_data_mcl, img_size, 8)
 
-print(batches.shape)
+batches = batches.reshape([batches.shape[0] * batches.shape[1],batches.shape[2] * batches.shape[3] * batches.shape[4]])
 
+pca = PCA(n_components = 75)
+pca.fit(batches)
+
+print(pca.explained_variance_ratio_)
+print(pca.singular_values_)
+# batches = batches.reshape
