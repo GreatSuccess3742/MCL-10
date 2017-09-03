@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
+from tempfile import TemporaryFile
 
 # Functions:
 def batching(image, image_size, window_size):
@@ -76,6 +77,10 @@ image_data_mcl = image_data_mcl.astype(np.float64)/255
 batches = batching(image_data_mcl, img_size, 8)
 
 batches = batches.reshape([batches.shape[0] * batches.shape[1],batches.shape[2] * batches.shape[3] * batches.shape[4]])
+
+# Output batches (numpy array) to a file
+# outfile = TemporaryFile()
+np.save("batches.npy",batches)
 
 pca = PCA(n_components = 75)
 pca.fit(batches)
