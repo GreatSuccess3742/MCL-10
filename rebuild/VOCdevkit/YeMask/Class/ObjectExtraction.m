@@ -20,7 +20,24 @@ for folderIndex = 1:length(folderList)
         mask(mask < 0.5) = 0;
         
         output = srcImg .* mask;
-        outputFileName = strcat(dstPath,folderList(folderIndex).name,'/',fileName(fileIndex).name);
-        imwrite(output,outputFileName);
+        
+        % Background color augmentation
+        greyBackGroundImg = output;
+        greyBackGroundImg(greyBackGroundImg == 0) = 0.5;
+        
+        whiteBackGroundImg = output;
+        whiteBackGroundImg(whiteBackGroundImg == 0) = 1.0;
+        
+        % Output black background (original) images
+%         outputFileName = strcat(dstPath,folderList(folderIndex).name,'/',fileName(fileIndex).name);
+%         imwrite(output,outputFileName);
+
+        % Output grey background images
+        outputFileName = strcat(dstPath,folderList(folderIndex).name,'/grey_',fileName(fileIndex).name);
+        imwrite(greyBackGroundImg,outputFileName);
+        
+        % Output white background images
+        outputFileName = strcat(dstPath,folderList(folderIndex).name,'/white_',fileName(fileIndex).name);
+        imwrite(whiteBackGroundImg,outputFileName);
     end
 end
